@@ -1,0 +1,66 @@
+﻿using TodoList.WebApi.Database.Entities;
+using TodoList.WebApi.Database.Repositories.Interfaces;
+using TodoList.WebApi.Models;
+using TodoList.WebApi.Models.Exceptions;
+using TodoList.WebApi.Services.Interfaces;
+
+namespace TodoList.WebApi.Services;
+
+public class TodoService : ITodoService
+{
+    private readonly ITodoRepository _todoRepository;
+
+    public TodoService(ITodoRepository todoRepository)
+    {
+        _todoRepository = todoRepository;
+    }
+
+    public async Task<TodoEntity> CreateTodo(Todo todo)
+    {
+        TodoEntity todoEntity = new TodoEntity(todo);
+        await _todoRepository.InsertTodoAsync(todoEntity);
+        return todoEntity;
+    }
+
+    public async Task<IEnumerable<TodoEntity>> GetTodos()
+    {
+        return await _todoRepository.GetTodos();
+    }
+
+    public async Task<TodoEntity> GetTodoById(long id)
+    {
+        TodoEntity? todoEntity = await _todoRepository.GetTodoById(id);
+
+        if (todoEntity == null)
+        {
+            throw new NotFoundException(ErrorMessages.NotFound);
+        }
+
+        return todoEntity;
+    }
+
+    public async Task<bool> UpdateTodo(long id, Todo todo)
+    {
+        TodoEntity todoEntity = await GetTodoById(id);
+
+        todoEntity.Description = todo.Description;
+        todoEntity.Title = todo.Title;
+        todoEntity.Priority = todo.Priority;
+        todoEntity.LastModified = DateTimeOffset.UtcNow;
+
+        await _todoRepository.SaveAsync();
+
+        return true;
+    }
+    
+    public async Task<bool> DeleteTodo(long id)
+    {
+        TodoEntity todoEntity = await GetTodoById(id);
+
+        todoEntity.IsDeleted = true;
+
+        await _todoRepository.SaveAsync();
+        return true;
+
+    }
+}
