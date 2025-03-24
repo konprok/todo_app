@@ -9,6 +9,6 @@ public interface ITodoService
     public Task<TodoEntity> CreateTodo(Todo todo);
     public Task<IEnumerable<TodoEntity>> GetTodos();
     public Task<TodoEntity> GetTodoById(long id);
-    public Task<bool> UpdateTodo(long id, Todo todo);
+    public Task<TodoEntity> UpdateTodo(long id, Todo todo);
     public Task<bool> DeleteTodo(long id);
 }

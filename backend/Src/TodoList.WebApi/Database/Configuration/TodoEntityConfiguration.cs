@@ -25,7 +25,7 @@ public sealed class TodoEntityConfiguration : IEntityTypeConfiguration<TodoEntit
             .HasColumnName("is_completed");
         
         builder.Property(x => x.IsDeleted)
-            .HasColumnName("is_completed");
+            .HasColumnName("is_deleted");
         
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at");

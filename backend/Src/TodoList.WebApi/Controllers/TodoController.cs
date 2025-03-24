@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TodoList.WebApi.Database.Entities;
 using TodoList.WebApi.Models;
+using TodoList.WebApi.Models.Exceptions;
 using TodoList.WebApi.Services.Interfaces;
 
 namespace TodoList.WebApi.Controllers;
@@ -25,6 +26,10 @@ public class TodoController : ControllerBase
         try
         {
             return Ok(await _todoService.CreateTodo(todo));
+        }
+        catch (InvalidArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
@@ -58,6 +63,10 @@ public class TodoController : ControllerBase
         {
             return Ok(await _todoService.GetTodoById(id));
         }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ex.Message);
@@ -68,11 +77,19 @@ public class TodoController : ControllerBase
     /// Updates todos
     /// </summary>
     [HttpPatch("{id}")]
-    public async Task<ActionResult<bool>> PatchTodo(long id, [FromBody] Todo todo)
+    public async Task<ActionResult<TodoEntity>> PatchTodo(long id, [FromBody] Todo todo)
     {
         try
         {
             return Ok(await _todoService.UpdateTodo(id, todo));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (InvalidArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
@@ -89,6 +106,10 @@ public class TodoController : ControllerBase
         try
         {
             return Ok(await _todoService.DeleteTodo(id));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
         }
         catch (Exception ex)
         {

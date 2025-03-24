@@ -13,10 +13,14 @@ public sealed class TodoEntity
     public DateTimeOffset LastModified { get; set; }
     public TodoPriority Priority { get; set; }
 
+    public TodoEntity()
+    {
+    }
+
     public TodoEntity(Todo todo)
     {
         Title = todo.Title;
-        Description = Description;
+        Description = todo.Description;
         IsCompleted = false;
         IsDeleted = false;
         CreatedAt = DateTimeOffset.UtcNow;
