@@ -74,6 +74,23 @@ public class TodoService : ITodoService
         return todoEntity;
     }
 
+    public async Task<TodoEntity> ChangeTodoStatus(long id, bool finished)
+    {
+       TodoEntity todoEntity =  await GetTodoById(id);
+       if (todoEntity.IsDeleted)
+       {
+           throw new NotFoundException(ErrorMessages.NotExist);
+       }
+       if (todoEntity.IsCompleted != finished)
+       {
+           todoEntity.IsCompleted = finished;
+           todoEntity.LastModified = DateTimeOffset.UtcNow;
+           await _todoRepository.SaveAsync();
+       }
+
+       return todoEntity;
+    }
+
     public async Task<bool> DeleteTodo(long id)
     {
         TodoEntity todoEntity = await GetTodoById(id);
