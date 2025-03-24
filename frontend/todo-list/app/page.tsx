@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Swal from 'sweetalert2';
 import {
   getTodos,
   createTodo,
@@ -11,6 +12,7 @@ import {
   TodoPriority,
 } from "../services/todoService";
 
+// Priority-related constants
 const priorityLabels = {
   [TodoPriority.Low]: "Low",
   [TodoPriority.Normal]: "Normal",
@@ -32,35 +34,50 @@ const priorityBadgeColors = {
   [TodoPriority.Critical]: "bg-red-100 text-red-800",
 };
 
-export default function Home() {
+export default function TodoListPage() {
+  // State management
   const [todos, setTodos] = useState<TodoEntity[]>([]);
-
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newPriority, setNewPriority] = useState<TodoPriority>(TodoPriority.Normal);
 
+  // Edit state
   const [editTodoId, setEditTodoId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPriority, setEditPriority] = useState<TodoPriority>(TodoPriority.Normal);
 
+  // Fetch todos on component mount
   useEffect(() => {
     fetchTodos();
   }, []);
 
+  // Fetch todos from service
   async function fetchTodos() {
     try {
       const data = await getTodos();
       setTodos(data);
     } catch (error) {
-      console.error(error);
-      alert("Error fetching task list!");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Error fetching tasks!',
+        background: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
+      });
     }
   }
 
+  // Add new task
   async function handleAddTask() {
     if (!newTitle.trim()) {
-      alert("Enter task title!");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Input',
+        text: 'Please enter a task title!',
+        background: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
+      });
       return;
     }
     try {
@@ -74,11 +91,17 @@ export default function Home() {
       setNewDescription("");
       setNewPriority(TodoPriority.Normal);
     } catch (error) {
-      console.error(error);
-      alert("Error creating task!");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to create task!',
+        background: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
+      });
     }
   }
 
+  // Start editing a todo
   function startEditing(todo: TodoEntity) {
     setEditTodoId(todo.id);
     setEditTitle(todo.title);
@@ -86,6 +109,7 @@ export default function Home() {
     setEditPriority(todo.priority);
   }
 
+  // Cancel editing
   function cancelEditing() {
     setEditTodoId(null);
     setEditTitle("");
@@ -93,9 +117,16 @@ export default function Home() {
     setEditPriority(TodoPriority.Normal);
   }
 
+  // Confirm editing
   async function confirmEditing(id: number) {
     if (!editTitle.trim()) {
-      alert("Title cannot be empty!");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Input',
+        text: 'Title cannot be empty!',
+        background: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
+      });
       return;
     }
     try {
@@ -107,33 +138,69 @@ export default function Home() {
       setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
       cancelEditing();
     } catch (error) {
-      console.error(error);
-      alert("Error editing task!");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to edit task!',
+        background: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
+      });
     }
   }
 
+  // Toggle task completion
   async function handleToggleComplete(todo: TodoEntity) {
     try {
       const updated = await changeTodoStatus(todo.id, !todo.isCompleted);
       setTodos((prev) => prev.map((t) => (t.id === todo.id ? updated : t)));
     } catch (error) {
-      console.error(error);
-      alert("Error changing task status!");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to change task status!',
+        background: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
+      });
     }
   }
 
+  // Delete a task
   async function handleDelete(id: number) {
-    if (!confirm("Are you sure you want to delete this task?")) return;
-    try {
-      await deleteTodo(id);
-      setTodos((prev) => prev.filter((t) => t.id !== id));
-    } catch (error) {
-      console.error(error);
-      alert("Error deleting task!");
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won\'t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+      background: '#f3f4f6',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteTodo(id);
+        setTodos((prev) => prev.filter((t) => t.id !== id));
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'Your task has been deleted.',
+          icon: 'success',
+          background: '#f3f4f6',
+          confirmButtonColor: '#3b82f6',
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to delete task!',
+          background: '#f3f4f6',
+          confirmButtonColor: '#3b82f6',
+        });
+      }
     }
   }
 
-  // Separate todos into completed and non-completed
+  // Separate and sort todos
   const incompleteTodos = todos.filter(todo => !todo.isCompleted)
     .sort((a, b) => b.priority - a.priority);
   const completedTodos = todos.filter(todo => todo.isCompleted)
@@ -145,9 +212,10 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">My Todo List</h1>
 
         <div className="space-y-4">
+          {/* Task Title Input */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text font-semibold">Task Title (max 100 characters)</span>
+              <span className="label-text font-semibold">Task Title</span>
             </label>
             <input
               type="text"
@@ -158,9 +226,11 @@ export default function Home() {
               onChange={(e) => setNewTitle(e.target.value)}
             />
           </div>
+
+          {/* Task Description Input */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text font-semibold">Description (max 1000 characters, optional)</span>
+              <span className="label-text font-semibold">Description</span>
             </label>
             <textarea
               className="textarea textarea-bordered w-full border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
@@ -171,6 +241,8 @@ export default function Home() {
               onChange={(e) => setNewDescription(e.target.value)}
             />
           </div>
+
+          {/* Priority Selector */}
           <div className="form-control">
             <label className="label">
               <span className="label-text font-semibold">Priority</span>
@@ -186,6 +258,8 @@ export default function Home() {
               <option value={TodoPriority.Critical}>🔴 Critical</option>
             </select>
           </div>
+
+          {/* Add Task Button */}
           <button 
             className="btn btn-primary w-full mt-4 rounded-xl border-2 border-blue-600 hover:bg-blue-600 transition-all duration-300 ease-in-out transform hover:scale-[1.02]"
             onClick={handleAddTask}
@@ -195,8 +269,8 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Incomplete Todos Section */}
       <div className="space-y-6">
-        {/* Incomplete Todos */}
         {incompleteTodos.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold mb-4 text-gray-700">Active Tasks</h2>
@@ -208,12 +282,35 @@ export default function Home() {
                 >
                   <div className="p-6">
                     <div className="flex items-start space-x-4">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary checkbox-lg border-2 border-blue-500 checked:bg-blue-500 checked:border-blue-500 mt-1"
-                        checked={todo.isCompleted}
-                        onChange={() => handleToggleComplete(todo)}
-                      />
+                      {/* Enhanced Squared Checkbox */}
+                      <div className="relative w-7 h-7 mt-1">
+                        <input
+                          type="checkbox"
+                          className="absolute opacity-0 w-full h-full cursor-pointer z-10 peer"
+                          checked={todo.isCompleted}
+                          onChange={() => handleToggleComplete(todo)}
+                        />
+                        <div className={`absolute inset-0 border-2 ${todo.isCompleted ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'} rounded-lg transition-all duration-300`}>
+                          {todo.isCompleted && (
+                            <svg 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              className="h-full w-full text-white p-1" 
+                              fill="none" 
+                              viewBox="0 0 24 24" 
+                              stroke="currentColor"
+                            >
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={3} 
+                                d="M5 13l4 4L19 7" 
+                              />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Rest of the todo item rendering remains the same as in previous version */}
                       <div className="flex-1 min-w-0">
                         {editTodoId === todo.id ? (
                           <div className="space-y-3">
@@ -264,6 +361,7 @@ export default function Home() {
                         )}
                       </div>
 
+                      {/* Action Buttons */}
                       <div className="flex flex-col space-y-2 w-24">
                         {editTodoId === todo.id ? (
                           <>
@@ -305,7 +403,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Completed Todos */}
+        {/* Completed Todos Section - Similar changes for completed todos */}
         {completedTodos.length > 0 && (
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-700">Completed Tasks</h2>
@@ -317,12 +415,33 @@ export default function Home() {
                 >
                   <div className="p-6">
                     <div className="flex items-start space-x-4">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary checkbox-lg border-2 border-blue-500 checked:bg-blue-500 checked:border-blue-500 mt-1"
-                        checked={todo.isCompleted}
-                        onChange={() => handleToggleComplete(todo)}
-                      />
+                      {/* Squared Checkbox for Completed Todos */}
+                      <div className="relative w-7 h-7 mt-1">
+                        <input
+                          type="checkbox"
+                          className="absolute opacity-0 w-full h-full cursor-pointer z-10 peer"
+                          checked={todo.isCompleted}
+                          onChange={() => handleToggleComplete(todo)}
+                        />
+                        <div className="absolute inset-0 bg-blue-500 border-2 border-blue-500 rounded-lg">
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="h-full w-full text-white p-1" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={3} 
+                              d="M5 13l4 4L19 7" 
+                            />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Completed Todo Content */}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-bold text-gray-400 line-through break-words">
                           {todo.title}
