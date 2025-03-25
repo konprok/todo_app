@@ -163,7 +163,7 @@ true // or false
 Below is a screenshot demonstrating the application's user interface:
 
 <div align="center">
-    <img src="assets/todo_app_screenshot.png" alt="Todo App Preview" width="45%" />
+    <img src="assets/todo_app_screenshot.png" alt="Todo App Preview" width="50%" />
 </div>
 
 ---
