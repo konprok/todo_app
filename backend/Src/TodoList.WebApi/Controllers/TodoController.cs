@@ -96,16 +96,16 @@ public class TodoController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
-    
+
     /// <summary>
     /// Updates todos
     /// </summary>
     [HttpPatch("{id}/status")]
-    public async Task<ActionResult<TodoEntity>> PatchTodo(long id, bool finished)
+    public async Task<ActionResult<TodoEntity>> PatchTodo(long id, [FromBody] bool isCompleted)
     {
         try
         {
-            return Ok(await _todoService.ChangeTodoStatus(id, finished));
+            return Ok(await _todoService.ChangeTodoStatus(id, isCompleted));
         }
         catch (NotFoundException ex)
         {

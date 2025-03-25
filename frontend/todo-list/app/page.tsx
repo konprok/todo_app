@@ -12,7 +12,6 @@ import {
   TodoPriority,
 } from "../services/todoService";
 
-// Priority-related constants
 const priorityLabels = {
   [TodoPriority.Low]: "Low",
   [TodoPriority.Normal]: "Normal",
@@ -23,36 +22,32 @@ const priorityLabels = {
 const priorityColors = {
   [TodoPriority.Low]: "border-green-500",
   [TodoPriority.Normal]: "border-blue-500",
-  [TodoPriority.High]: "border-orange-500",
+  [TodoPriority.High]: "border-yellow-500",
   [TodoPriority.Critical]: "border-red-600",
 };
 
 const priorityBadgeColors = {
   [TodoPriority.Low]: "bg-green-100 text-green-800",
   [TodoPriority.Normal]: "bg-blue-100 text-blue-800",
-  [TodoPriority.High]: "bg-orange-100 text-orange-800",
+  [TodoPriority.High]: "bg-yellow-100 text-yellow-800",
   [TodoPriority.Critical]: "bg-red-100 text-red-800",
 };
 
 export default function TodoListPage() {
-  // State management
   const [todos, setTodos] = useState<TodoEntity[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newPriority, setNewPriority] = useState<TodoPriority>(TodoPriority.Normal);
 
-  // Edit state
   const [editTodoId, setEditTodoId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPriority, setEditPriority] = useState<TodoPriority>(TodoPriority.Normal);
 
-  // Fetch todos on component mount
   useEffect(() => {
     fetchTodos();
   }, []);
 
-  // Fetch todos from service
   async function fetchTodos() {
     try {
       const data = await getTodos();
@@ -68,7 +63,6 @@ export default function TodoListPage() {
     }
   }
 
-  // Add new task
   async function handleAddTask() {
     if (!newTitle.trim()) {
       Swal.fire({
@@ -101,7 +95,6 @@ export default function TodoListPage() {
     }
   }
 
-  // Start editing a todo
   function startEditing(todo: TodoEntity) {
     setEditTodoId(todo.id);
     setEditTitle(todo.title);
@@ -109,7 +102,6 @@ export default function TodoListPage() {
     setEditPriority(todo.priority);
   }
 
-  // Cancel editing
   function cancelEditing() {
     setEditTodoId(null);
     setEditTitle("");
@@ -117,7 +109,6 @@ export default function TodoListPage() {
     setEditPriority(TodoPriority.Normal);
   }
 
-  // Confirm editing
   async function confirmEditing(id: number) {
     if (!editTitle.trim()) {
       Swal.fire({
@@ -148,7 +139,6 @@ export default function TodoListPage() {
     }
   }
 
-  // Toggle task completion
   async function handleToggleComplete(todo: TodoEntity) {
     try {
       const updated = await changeTodoStatus(todo.id, !todo.isCompleted);
@@ -164,7 +154,6 @@ export default function TodoListPage() {
     }
   }
 
-  // Delete a task
   async function handleDelete(id: number) {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -200,7 +189,6 @@ export default function TodoListPage() {
     }
   }
 
-  // Separate and sort todos
   const incompleteTodos = todos.filter(todo => !todo.isCompleted)
     .sort((a, b) => b.priority - a.priority);
   const completedTodos = todos.filter(todo => todo.isCompleted)
@@ -212,7 +200,6 @@ export default function TodoListPage() {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">My Todo List</h1>
 
         <div className="space-y-4">
-          {/* Task Title Input */}
           <div className="form-control">
             <label className="label">
               <span className="label-text font-semibold">Task Title</span>
@@ -227,7 +214,6 @@ export default function TodoListPage() {
             />
           </div>
 
-          {/* Task Description Input */}
           <div className="form-control">
             <label className="label">
               <span className="label-text font-semibold">Description</span>
@@ -242,7 +228,6 @@ export default function TodoListPage() {
             />
           </div>
 
-          {/* Priority Selector */}
           <div className="form-control">
             <label className="label">
               <span className="label-text font-semibold">Priority</span>
@@ -259,7 +244,6 @@ export default function TodoListPage() {
             </select>
           </div>
 
-          {/* Add Task Button */}
           <button 
             className="btn btn-primary w-full mt-4 rounded-xl border-2 border-blue-600 hover:bg-blue-600 transition-all duration-300 ease-in-out transform hover:scale-[1.02]"
             onClick={handleAddTask}
@@ -269,7 +253,6 @@ export default function TodoListPage() {
         </div>
       </div>
 
-      {/* Incomplete Todos Section */}
       <div className="space-y-6">
         {incompleteTodos.length > 0 && (
           <div>
@@ -282,7 +265,6 @@ export default function TodoListPage() {
                 >
                   <div className="p-6">
                     <div className="flex items-start space-x-4">
-                      {/* Enhanced Squared Checkbox */}
                       <div className="relative w-7 h-7 mt-1">
                         <input
                           type="checkbox"
@@ -310,7 +292,6 @@ export default function TodoListPage() {
                         </div>
                       </div>
 
-                      {/* Rest of the todo item rendering remains the same as in previous version */}
                       <div className="flex-1 min-w-0">
                         {editTodoId === todo.id ? (
                           <div className="space-y-3">
@@ -361,7 +342,6 @@ export default function TodoListPage() {
                         )}
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex flex-col space-y-2 w-24">
                         {editTodoId === todo.id ? (
                           <>
@@ -403,7 +383,6 @@ export default function TodoListPage() {
           </div>
         )}
 
-        {/* Completed Todos Section - Similar changes for completed todos */}
         {completedTodos.length > 0 && (
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-700">Completed Tasks</h2>
@@ -415,7 +394,6 @@ export default function TodoListPage() {
                 >
                   <div className="p-6">
                     <div className="flex items-start space-x-4">
-                      {/* Squared Checkbox for Completed Todos */}
                       <div className="relative w-7 h-7 mt-1">
                         <input
                           type="checkbox"
@@ -441,7 +419,6 @@ export default function TodoListPage() {
                         </div>
                       </div>
 
-                      {/* Completed Todo Content */}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-bold text-gray-400 line-through break-words">
                           {todo.title}

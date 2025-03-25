@@ -16,9 +16,14 @@ builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<IValidator<Todo>, TodoModelValidator>();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddCors(options =>
 {
-    options.UseNpgsql(configuration.GetConnectionString("AppDbContext"));
+    options.AddPolicy("AllowLocalFrontend3000", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
@@ -26,6 +31,11 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(configuration.GetConnectionString("AppDbContext"));
+});
 
 var app = builder.Build();
 
@@ -37,8 +47,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowLocalFrontend3000");
 //app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
+public partial class Program
+{
+}
