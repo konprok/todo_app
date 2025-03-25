@@ -1,0 +1,11 @@
+﻿global using System.Net;
+global using System.Net.Http.Json;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using TodoList.WebApi.Database.Entities;
+global using TodoList.WebApi.Models;
+global using FluentAssertions;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using TodoList.WebApi.Database.DbContext;
