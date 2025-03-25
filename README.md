@@ -162,6 +162,8 @@ true // or false
 
 Below is a screenshot demonstrating the application's user interface:
 
-![Todo App Preview](todo_app_screenshot.png)
+<div align="center">
+    <img src="assets/todo_app_screenshot.png" alt="Todo App Preview" width="45%" />
+</div>
 
 ---
